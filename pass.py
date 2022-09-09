@@ -1,6 +1,7 @@
 from linecache import getline
 from getpass import getpass
 import bcrypt
+import requests
 
 class User:
     def __init__(self, userName, hpass):
@@ -16,6 +17,12 @@ def checkIfUserExists(userName, database):
         return user
     else:
         return False
+
+def getRandomBibleVerse():
+    response = requests.get("https://labs.bible.org/api/?passage=random")
+    data = response.text
+    return data
+
 
 def createNewUser(userName, password, hashed, database, textFile):
     userName = input("Enter username:")
@@ -37,7 +44,12 @@ def userLogin(database):
     password = getpass("Enter your password:").encode()
     userlg = checkIfUserExists(userName, database)
     if (bcrypt.checkpw(password, userlg.hpass.encode())):
-        print("\nLogin succesful.")
+        print("\nLogin succesful.\n Would you like to get a random bible quote? y/n")
+        opt = input()
+        while(opt == 'y' or opt == 'yes'):
+            print("\n" + getRandomBibleVerse())
+            print("\nWould you like another Bible Verse?")
+            opt = input()
         return userlg
     else:
         print("\nLogin failed.")
@@ -52,7 +64,7 @@ nome = ""
 hp = ""
 userName = ""
 hashed = b''
-textFile = open("passwords.txt", "a")
+textFile = open("passwords.txt", "a+")
  # Hash a password for the first time, with a randomly-generated salt
 # Check that an unhashed password matches one that has previously been
  # hashed
