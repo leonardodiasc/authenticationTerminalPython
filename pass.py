@@ -1,4 +1,5 @@
 from linecache import getline
+from getpass import getpass
 import bcrypt
 
 class User:
@@ -22,7 +23,7 @@ def createNewUser(userName, password, hashed, database, textFile):
     while (checkIfUserExists(userName, database) != False):
         userName = input("Username already taken, enter another:")
 
-    password = input("Enter password: ").encode()
+    password = getpass("Enter password: ").encode()
     hashed = bcrypt.hashpw(password, bcrypt.gensalt(14))
     textFile.write("\nuser: " + userName + "\n" + "password: " + hashed.decode())
     database.append(User(userName, hashed.decode()))
@@ -33,7 +34,7 @@ def userLogin(database):
     userName = input("Enter your username:")
     while(checkIfUserExists(userName, database) == False):
         userName = input("User does not exist, retype:")
-    password = input("Enter your password:").encode()
+    password = getpass("Enter your password:").encode()
     userlg = checkIfUserExists(userName, database)
     if (bcrypt.checkpw(password, userlg.hpass.encode())):
         print("\nLogin succesful.")
@@ -71,8 +72,8 @@ with open("passwords.txt", "r") as fileDb:
 while (True):
     option = input("Would you like to:\n1-Create new user\n2-Login\n:")
     match option:
-        case "Create new user":
+        case "1":
             createNewUser(userName, password, hashed, database, textFile)
-        case "Login":
+        case "2":
             userLogin(database)
 
