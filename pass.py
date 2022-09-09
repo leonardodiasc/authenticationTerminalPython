@@ -12,22 +12,38 @@ def checkIfUserExists(userName, database):
         if(userName == user.userName):
             n = n + 1
     if(n == 1):
-        return True
+        return user
     else:
         return False
 
 def createNewUser(userName, password, hashed, database, textFile):
     userName = input("Enter username:")
 
-    while (checkIfUserExists(userName, database) == True):
+    while (checkIfUserExists(userName, database) != False):
         userName = input("Username already taken, enter another:")
 
     password = input("Enter password: ").encode()
     hashed = bcrypt.hashpw(password, bcrypt.gensalt(14))
     textFile.write("\nuser: " + userName + "\n" + "password: " + hashed.decode())
     database.append(User(userName, hashed.decode()))
+    print("User succesfully created.")
     return hashed
     
+def userLogin(database):
+    userName = input("Enter your username:")
+    while(checkIfUserExists(userName, database) == False):
+        userName = input("User does not exist, retype:")
+    password = input("Enter your password:").encode()
+    userlg = checkIfUserExists(userName, database)
+    if (bcrypt.checkpw(password, userlg.hpass.encode())):
+        print("\nLogin succesful.")
+        return userlg
+    else:
+        print("\nLogin failed.")
+        return False
+
+    
+
 
 database = []
 password = ""
@@ -52,11 +68,11 @@ with open("passwords.txt", "r") as fileDb:
         hp = hp.split()
         database.append(User(nome[1],hp[1]))
 
+while (True):
+    option = input("Would you like to:\n1-Create new user\n2-Login\n:")
+    match option:
+        case "Create new user":
+            createNewUser(userName, password, hashed, database, textFile)
+        case "Login":
+            userLogin(database)
 
-hashed = createNewUser(userName, password, hashed, database, textFile)
-passtest = input("Enter your password again:").encode('utf-8')
-
-if bcrypt.checkpw(passtest, hashed):
-     print("It Matches!")
-else:
-     print("It Does not Match :(")
