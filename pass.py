@@ -68,13 +68,12 @@ def userOptions(user, database):
                 print("\n(1)Would you like another Bible Verse?\n(2) Check if you are admin.\n(3) Admin options.\n(4) Exit program.")
             case '2':
                 user.adminChk()
-                print("\n(1)Would you like a Bible Verse?\n(2) Check if you are admin.\n(3) Admin options.\n(4) Exit program.")
             case '3':
                 if(user.isAdmin == False):
                     print("\nIntruder, you are not admin.")
                     break
                 elif(user.isAdmin == True):
-                    print("\nWould you like to:\n(1)Remove user\n(2)Make user admin.")
+                    print("\nWould you like to:\n(1)Remove user\n(2)Make user admin. \n(3) Deny admin rights to user\n(4) Return to previous menu\n:")
                     aopt = input()
                     match aopt:
                         case '1':
@@ -94,6 +93,17 @@ def userOptions(user, database):
                                 user_selected.makeAdmin()
                             else:
                                 print("\nUser does not exist.") 
+                        case '3':
+                            print("Type the username you would like to deny admin priviledges:")
+                            user_read = input()
+                            user_selected = checkIfUserExists(user_read, database)
+                            if (user_selected != False):
+                                user_selected.removeAdmin()
+                            else:
+                                print("\nUser does not exist.") 
+                        case '4':
+                            continue
+
             case '4':
                 break                  
 
