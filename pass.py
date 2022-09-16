@@ -34,9 +34,9 @@ def checkIfUserExists(userName, database):
     for user in database:
         if(userName == user.userName):
             n = n + 1
-    if(n == 1):
-        return user
-    else:
+        if(n == 1):
+            return user
+    if (n == 0):
         return False
 
 def getRandomBibleVerse():
@@ -66,7 +66,6 @@ def userOptions(user, database):
                 print("\n" + getRandomBibleVerse())
                 print("\n(1)Would you like another Bible Verse?\n(2) Check if you are admin.\n(3) Admin options.\n(4) Exit program.")
             case '2':
-                user.adminChk()
                 print("\n(1)Would you like a Bible Verse?\n(2) Check if you are admin.\n(3) Admin options.\n(4) Exit program.")
             case '3':
                 if(user.isAdmin == False):
@@ -78,19 +77,17 @@ def userOptions(user, database):
                     match aopt:
                         case '1':
                             print("\nType the username you would like to remove:")
-                            user_rm = input()
-                            user_selected = checkIfUserExists(user_rm, database)
+                            user_read = input()
+                            user_selected = checkIfUserExists(user_read, database)
                             if (user_selected != False):
                                 database.remove(user_selected)
-                                break
                             else:
                                 print("\nUser does not exist.")
-                                break
 
                         case '2':
                             print("Type the username you would like to make admin.")
-                            user_selected = input()
-                            user_selected = checkIfUserExists(user_rm, database)
+                            user_read = input()
+                            user_selected = checkIfUserExists(user_read, database)
                             if (user_selected != False):
                                 print("\nThis is not yet available.")
                             else:
@@ -107,6 +104,7 @@ def userLogin(database):
     password = getpass("Enter your password:").encode()
     userlg = checkIfUserExists(userName, database)
     if (bcrypt.checkpw(password, userlg.hpass.encode())):
+        userlg.adminChk()
         userOptions(userlg, database)
         return userlg
     else:
@@ -146,6 +144,7 @@ with open("passwords.txt", "r") as fileDb:
         hp = hp.split()
         if (nome[2] == "true"):
             database.append(User(nome[1],hp[1], True))
+
         elif(nome[2] == "false"):
             database.append(User(nome[1],hp[1], False))
         
