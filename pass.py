@@ -58,14 +58,12 @@ def createNewUser(userName, password, hashed, database):
     return hashed
 
 def userOptions(user, database):
-    print("\nLogin succesful.\n............")
     while(True):
         print("\n(1)Would you like a Bible Verse?\n(2) Check if you are admin.\n(3) Admin options.\n(4) Exit program.")
         opt = input()
         match opt: 
             case '1':
                 print("\n" + getRandomBibleVerse())
-                print("\n(1)Would you like another Bible Verse?\n(2) Check if you are admin.\n(3) Admin options.\n(4) Exit program.")
             case '2':
                 user.adminChk()
             case '3':
@@ -116,6 +114,7 @@ def userLogin(database):
     password = getpass("Enter your password:").encode()
     userlg = checkIfUserExists(userName, database)
     if (bcrypt.checkpw(password, userlg.hpass.encode())):
+        print("\nLogin succesful.\n............")
         userOptions(userlg, database)
         return userlg
     else:
