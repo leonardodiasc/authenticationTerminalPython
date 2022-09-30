@@ -1,7 +1,10 @@
 from linecache import getline
+from cryptography.fernet import Fernet
 from getpass import getpass
+from datetime import datetime
 import bcrypt
 import requests
+
 
 
 class User:
@@ -28,6 +31,34 @@ class User:
         elif(self.isAdmin == True):
             print("\n You are Admin.")
         
+## CHAT ##
+
+def showChat(key):
+    file = open("chat.txt", "r")
+    while(True):
+        msg = file.readline()
+        if (msg == ""):
+            break
+        msg = msg.split()
+        fernet = Fernet(key)
+        decMessage = fernet.decrypt(msg[0]).decode()
+        print("user: " + decMessage + " ")
+        decMessage = fernet.decrypt(msg[1]).decode()
+        print("at: " + decMessage + " ")
+        decMessage = fernet.decrypt(msg[2]).decode()
+        print("said: " + decMessage + "\n")
+
+def addChatMessage(key, user):
+    file = open("chat.txt", "a")
+    print("\nEnter your message: ")
+    message = input()
+    fernet = Fernet(key)
+    decMessage = fernet.encrypt(message.encode())
+    date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    decDate = fernet.encrypt(date.encode())
+    decUser = fernet.encrypt(user.userName.encode())
+    file.write(decUser.decode() + " " + decDate.decode() + " " + decMessage.decode() + "\n")
+
 
 def checkIfUserExists(userName, database):
     n = 0
@@ -57,9 +88,9 @@ def createNewUser(userName, password, hashed, database):
     print("User succesfully created.")
     return hashed
 
-def userOptions(user, database):
+def userOptions(user, database, key):
     while(True):
-        print("\n(1)Would you like a Bible Verse?\n(2) Check if you are admin.\n(3) Admin options.\n(4) Exit program.")
+        print("\n(1)Would you like a Bible Verse?\n(2) Check if you are admin.\n(3) Admin options.\n(4) Enter chat.\n(5) Exit program.")
         opt = input()
         match opt: 
             case '1':
@@ -103,11 +134,20 @@ def userOptions(user, database):
                             continue
 
             case '4':
-                break                  
+                print("Would you like to:\n(1) See chat.\n(2) Add message to chat.\n:")
+                optchat = input()
+                match optchat:
+                    case '1':
+                        showChat(key)
+                    case '2':
+                        addChatMessage(key, user)
+            case '5':
+                break
+
 
 
     
-def userLogin(database):
+def userLogin(database, key):
     userName = input("Enter your username:")
     while(checkIfUserExists(userName, database) == False):
         userName = input("User does not exist, retype:")
@@ -115,13 +155,13 @@ def userLogin(database):
     userlg = checkIfUserExists(userName, database)
     if (bcrypt.checkpw(password, userlg.hpass.encode())):
         print("\nLogin succesful.\n............")
-        userOptions(userlg, database)
+        userOptions(userlg, database, key)
         return userlg
     else:
         print("\nLogin failed.")
         return False
 
-def saveDatabase(file, database):
+def saveDatabase(database):
     file = open("passwords.txt", "w")
     for user in database:
             file.write("user: " + user.userName + " " + user.amIAdmin() + "\npassword: " + user.hpass + "\n")
@@ -138,6 +178,8 @@ hp = ""
 userName = ""
 hashed = b''
 textFile = open("passwords.txt", "a+")
+fkey = open("key.txt", "r")
+key = fkey.readline().encode('utf-8')
  # Hash a password for the first time, with a randomly-generated salt
 # Check that an unhashed password matches one that has previously been
  # hashed
@@ -160,15 +202,15 @@ with open("passwords.txt", "r") as fileDb:
         
 
 while (True):
-    option = input("Would you like to:\n(1) Create new user\n(2)Login\n(3) Save and leave\n:")
+    option = input("Would you like to:\n(1)Create new user\n(2)Login\n(3)Save and leave\n:")
     match option:
         case "1":
             createNewUser(userName, password, hashed, database)
-            saveDatabase(textFile, database)
+            saveDatabase(database)
         case "2":
-            userLogin(database)
-            saveDatabase(textFile, database)
+            userLogin(database, key)
+            saveDatabase(database)
         case "3":
-            saveDatabase(textFile, database)
+            saveDatabase(database)
             break
 
